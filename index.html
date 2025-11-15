@@ -33,8 +33,49 @@
         </section>
     </div>
 
-    <script>
-        // Próximo passo: Escrever o código para buscar seus repositórios!
-    </script>
+   <script>
+    // O Google GEMINI nos auxiliou na criação deste script para buscar os repositórios:
+
+    // Use o seu nome de usuário do GitHub:
+    const GITHUB_USERNAME = 'gabrielsantmac'; 
+    // URL da API para buscar os 3 repositórios mais recentes
+    const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=3`;
+    const projectsContainer = document.getElementById('github-projects');
+
+    fetch(GITHUB_API_URL)
+        .then(response => {
+            // Se a resposta não for bem-sucedida (status 200), lança um erro
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar dados: ${response.status}. Verifique o nome de usuário.`);
+            }
+            return response.json();
+        })
+        .then(repos => {
+            projectsContainer.innerHTML = ''; // Limpa o texto "Carregando projetos..."
+
+            if (repos.length === 0) {
+                projectsContainer.innerHTML = '<p>Nenhum repositório público encontrado.</p>';
+                return;
+            }
+
+            // Cria um card para cada repositório
+            repos.forEach(repo => {
+                const item = document.createElement('div');
+                item.className = 'portfolio-item';
+                item.innerHTML = `
+                    <h3><a href="${repo.html_url}" target="_blank">${repo.name}</a></h3>
+                    <p>${repo.description || 'Nenhuma descrição fornecida.'}</p>
+                    <p><strong>Linguagem:</strong> ${repo.language || 'N/A'}</p>
+                    <p>Última atualização: ${new Date(repo.updated_at).toLocaleDateString('pt-BR')}</p>
+                `;
+                projectsContainer.appendChild(item);
+            });
+        })
+        .catch(error => {
+            // Trata erros na busca
+            projectsContainer.innerHTML = `<p style="color: red;">Erro ao carregar projetos: ${error.message}.</p>`;
+            console.error('Fetch error:', error);
+        });
+</script>
 </body>
 </html>
